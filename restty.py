@@ -6,23 +6,30 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 app.config.update(dict(
-	SQLALCHEMY_DATABASE_URI = "sqlite:///%s" % os.path.join(app.root_path, 'restty.db'),
-	SECRET_KEY = 'development_key',
-	USERNAME = 'admin',
-	PASSWORD = 'default'
+    SQLALCHEMY_DATABASE_URI='sqlite:///%s' % os.path.join(app.root_path, 'restty.db'),
+    SECRET_KEY='development_key',
+    USERNAME='admin',
+    PASSWORD='default'
 ))
-app.config.from_envvar('RESTTY_SETTINGS', silent = True)
+app.config.from_envvar('RESTTY_SETTINGS', silent=True)
 
 db = SQLAlchemy(app)
 
-class Command(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	command_name = db.Column(db.String, nullable=False)
-	args = db.Column(db.String, nullable=True)
 
-	def __repr__(self):
-		return "<Command %r>" % self.command
+class Command(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    command_name = db.Column(db.String, nullable=False)
+    args = db.Column(db.String, nullable=True)
+
+    def __repr__(self):
+        return '<Command %r>' % self.command
+
 
 @app.route("/")
 def index():
-	return str(Command.query.count())
+    return str(Command.query.count())
+
+
+if __name__ == '__main__':
+    db.create_all()
+    app.run()
