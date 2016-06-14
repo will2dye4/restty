@@ -4,7 +4,7 @@ import os
 from subprocess import Popen, PIPE, STDOUT
 from time import clock
 
-from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
+from flask import Flask, request    #, session, g, redirect, url_for, abort, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -28,7 +28,7 @@ class Command(db.Model):
     args = db.Column(db.String, nullable=True)
     start_time = db.Column(db.DateTime)
     execution_time = db.Column(db.Integer)
-    result = db.Column(db.String)
+    result = db.Column(db.Unicode)
     return_code = db.Column(db.Integer)
 
     def __init__(self, command_name, args=None):
@@ -55,7 +55,7 @@ class Command(db.Model):
         stdout, code, time = _exec()
         self.execution_time = time
         self.return_code = code
-        self.result = stdout
+        self.result = unicode(stdout, encoding='utf-8')
 
 
 @app.route('/')
@@ -73,8 +73,7 @@ def run():
         command = Command(c)
     db.session.add(command)
     db.session.commit()
-    # return json.dumps({'id': command.id, 'status': command.return_code, 'result': command.result})
-    return command.result
+    return json.dumps({'id': command.id, 'status': command.return_code, 'result': command.result})
 
 
 @app.route('/history', methods=['GET'])
@@ -83,5 +82,6 @@ def history():
 
 
 if __name__ == '__main__':
+    db.drop_all()
     db.create_all()
     app.run()
